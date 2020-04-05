@@ -38,8 +38,9 @@ ENV LLVM_CONFIG /clang/bin/llvm-config
 WORKDIR /
 RUN git clone https://github.com/jfbastien/musl
 WORKDIR /musl
+RUN git reset --hard d312ecae
 ENV CFLAGS -O3 --target=wasm32-unknown-unknown-wasm -nostdlib -Wl,--no-entry
-RUN CFLAGS="$CFLAGS -Wno-error=pointer-sign" ./configure --prefix=/musl-sysroot wasm32
+RUN CFLAGS="$CFLAGS -Wno-error=pointer-sign" ./configure --prefix=/musl-sysroot wasm32 -v
 RUN make -j$(nproc) install
 RUN chmod -R 777 /musl-sysroot
 ENV CFLAGS -O3 --target=wasm32-unknown-unknown-wasm -nostdlib -Wl,--no-entry --sysroot=/musl-sysroot
