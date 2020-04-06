@@ -10,16 +10,12 @@ RUN apt-get install -y \
   python \
   git
 
-WORKDIR /llvm/build
-RUN curl -L https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/llvm-10.0.0.src.tar.xz | \
-  tar xJf - -C /llvm --strip-components 1
-RUN mkdir /clang
-RUN curl -L https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang-10.0.0.src.tar.xz | \
-  tar xJf - -C /clang --strip-components 1
-RUN mkdir /lld
-RUN curl -L https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/lld-10.0.0.src.tar.xz | \
-  tar xJf - -C /lld --strip-components 1
-RUN cmake .. \
+WORKDIR /llvm
+RUN git clone https://github.com/llvm/llvm-project.git
+RUN cd llvm-project
+RUN mkdir build
+WORKDIR /llvm/llvm-project/build
+RUN cmake -G "Unix Makefiles" ../llvm \
   -DCMAKE_BUILD_TYPE=Release \
   -DLLVM_ENABLE_PROJECTS='lld;clang' \
   -DCMAKE_INSTALL_PREFIX=/clang \
@@ -36,9 +32,9 @@ ENV LD /clang/bin/ld.lld
 ENV LLVM_CONFIG /clang/bin/llvm-config
 
 WORKDIR /
-RUN git clone https://github.com/jfbastien/musl
+ARG CACHE_DATE
+RUN git clone https://github.com/nullrocket/musl.git
 WORKDIR /musl
-RUN git reset --hard d312ecae
 ENV CFLAGS -O3 --target=wasm32-unknown-unknown-wasm -nostdlib -Wl,--no-entry
 RUN CFLAGS="$CFLAGS -Wno-error=pointer-sign" ./configure --prefix=/musl-sysroot wasm32 -v
 RUN make -j$(nproc) install

@@ -5,13 +5,14 @@ STEPS_BUILD := $(foreach step,$(STEPS),$(step)/.BUILD)
 STEPS_CLEAN := $(foreach step,$(STEPS),$(step)/.CLEAN)
 STEPS_ENV := $(foreach step,$(STEPS),$(step)/.ENV)
 STEPS_TEST := $(foreach step,$(STEPS),$(step)/.TEST)
-
+RANDOM := $$(date +'%Y%m%d-%H%M%S')
 all: $(STEPS_BUILD)
 
 clean: $(STEPS_CLEAN)
 
 docker:
-	docker build --rm --tag $(DOCKER_IMAGE) .
+
+	docker build --rm --build-arg CACHE_DATE=$(RANDOM)  --tag  $(DOCKER_IMAGE) .
 	docker push $(DOCKER_IMAGE)
 
 env: $(STEPS_ENV)
