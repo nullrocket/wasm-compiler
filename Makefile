@@ -1,4 +1,4 @@
-DOCKER_IMAGE_VERSION := 10.0.0
+DOCKER_IMAGE_VERSION := 9.0.1
 DOCKER_IMAGE := wasm_compiler:$(DOCKER_IMAGE_VERSION)
 STEPS := $(sort $(wildcard */foo))
 STEPS_BUILD := $(foreach step,$(STEPS),$(step)/.BUILD)
@@ -11,9 +11,12 @@ all: $(STEPS_BUILD)
 clean: $(STEPS_CLEAN)
 
 docker:
+	docker build --rm --build-arg cache_date=$(RANDOM) --tag  $(DOCKER_IMAGE) .
 
-	docker build --rm --build-arg CACHE_DATE=$(RANDOM)  --tag  $(DOCKER_IMAGE) .
-	docker push $(DOCKER_IMAGE)
+push-docker:
+	cat ../GH_TOKEN.txt | docker login docker.pkg.github.com -u nullrocket --password-stdin
+	docker tag $(DOCKER_IMAGE) docker.pkg.github.com/nullrocket/wasm-compiler/$(DOCKER_IMAGE)
+	docker push docker.pkg.github.com/nullrocket/wasm-compiler/$(DOCKER_IMAGE)
 
 env: $(STEPS_ENV)
 	-cargo install wasm-bindgen-cli
@@ -35,4 +38,4 @@ $(STEPS_ENV):
 $(STEPS_TEST):
 	$(MAKE) -C $(@D) test
 
-.PHONY: all clean docker env update-wasm-bindgen test $(STEPS_BUILD) $(STEPS_CLEAN) $(STEPS_ENV) $(STEPS_TEST)
+.PHONY: all clean docker env update-wasm-bindgen test $(STEPS_BUILD) $(STEPS_CLEAN) $(STEPS_ENV) $(STEPS_TEST) docker-push
