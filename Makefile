@@ -1,4 +1,4 @@
-DOCKER_IMAGE_VERSION := 9.0.1
+DOCKER_IMAGE_VERSION := 9.0.2
 DOCKER_IMAGE := wasm_compiler:$(DOCKER_IMAGE_VERSION)
 STEPS := $(sort $(wildcard */foo))
 STEPS_BUILD := $(foreach step,$(STEPS),$(step)/.BUILD)
